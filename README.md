@@ -18,4 +18,4 @@ https://github.com/hajipong/othello_programme_study/compare/0e7daea61f9b686f9a8e
 
 次は
 
-https://github.com/hajipong/othello_programme_study/step1
+https://github.com/hajipong/othello_programme_study/tree/step1
