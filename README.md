@@ -1,21 +1,20 @@
-# 0. 事前準備をしよう
+# 1-1. 画面を作ろう　SVGで盤を描画
 
-このリポジトリはオセロプログラム学習用です。
+最近ではSVGタグを使えばHTMLでも簡単に図が描けます。
 
-ブランチごとにSTEPを作ってそれぞれの差分をチェックしながら見れるようにしています。
+まずは盤部分をとりあえず書くとこうなります。
 
-使うのはHTMLとJavaScriptのみなので、このままホスティングサービスに載せても動かすことができます。
+- - -
+![step1-1](./images/step1-1.png)
+- - -
+SVGについては少し記事を書いてますので、こちらをご覧ください。
 
-このブランチではHello Worldを表示しています。
-
-ここまでにわからない点がある方は、一度HTMLの基本を調べておくことをおすすめします。
-
+https://ameblo.jp/hajipong/entry-12697337004.html
 - - -
 コード
 
-https://github.com/hajipong/othello_programme_study/compare/0e7daea61f9b686f9a8e5f183a568c71423a0f99...83a3babfdbc2cbdb0fb84c0d45f90537ce5cff9d
+https://github.com/hajipong/othello_programme_study/compare/step0...step1
 - - -
 
-次は
-
-https://github.com/hajipong/othello_programme_study/tree/step1
+[＜前](https://github.com/hajipong/othello_programme_study/tree/step0)　
+[次＞](https://github.com/hajipong/othello_programme_study/tree/step1_2)
