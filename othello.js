@@ -33,7 +33,7 @@ function draw_board_background() {
     rect.setAttribute('width', board_size);
     rect.setAttribute('height', board_size);
     rect.setAttribute('fill', 'green');
-    document.querySelector('svg#board').appendChild(rect);
+    board_element().appendChild(rect);
 }
 
 // 盤上の線の描画
@@ -44,5 +44,9 @@ function draw_board_line(x1, y1, x2, y2) {
     line.setAttribute('x2', x2);
     line.setAttribute('y2', y2);
     line.setAttribute('stroke', 'black');
-    document.querySelector('svg#board').appendChild(line);
+    board_element().appendChild(line);
+}
+
+function board_element() {
+    return document.querySelector('svg#board');
 }
