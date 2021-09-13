@@ -11,7 +11,7 @@ SVGについては少し記事を書いてますので、こちらをご覧く�
 
 https://ameblo.jp/hajipong/entry-12697337004.html
 - - -
-コード
+前回とのコード差分
 
 https://github.com/hajipong/othello_programme_study/compare/step0...step1
 - - -
