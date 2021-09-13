@@ -1,4 +1,4 @@
-const cell_size = 40;
+const cell_size = 80;
 const board_offset_x = 0;
 const board_offset_y = 0;
 
