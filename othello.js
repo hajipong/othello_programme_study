@@ -14,14 +14,23 @@ const STONE = {
     WHITE : { color : '#FFF' }
 };
 
+let turn = STONE.BLACK;
+
 window.onload = function() {
     draw_board();
-    board_element().addEventListener('click', function(e){
-        console.log('x : ' + e.offsetX + '  y : ' + e.offsetY);
-        let cell_point = parse_cell_point({ x : e.offsetX, y : e.offsetY });
-        console.log('cell_x : ' + cell_point.x + '  cell_y : ' + cell_point.y);
-    });
+    board_element().addEventListener('click', on_board_click);
 };
+
+// 盤をクリックしたイベントの時の処理
+function on_board_click(event) {
+    try {
+        let cell_point = parse_cell_point({ x : event.offsetX, y : event.offsetY });
+        draw_stone(cell_point, turn);
+        turn = turn === STONE.BLACK ? STONE.WHITE : STONE.BLACK;
+    } catch (error) {
+        console.log(error.message);
+    }
+}
 
 // マス座標を石描画座標に変換します。
 // cell_point = { x : 0..7, y : 0..7 }
@@ -38,10 +47,22 @@ function parse_stone_view_point(cell_point) {
 // view_point = { x : int, y : int }
 // return { x : 0..7, y : 0..7 }
 function parse_cell_point(view_point) {
+    if (!is_available_view_point(view_point)) {
+        throw new Error('無効な座標です。');
+    }
+
     return {
         x : Math.floor((view_point.x - board_offset_x) / cell_size),
         y : Math.floor((view_point.y - board_offset_y) / cell_size)
     }
+}
+
+// 有効な座標か判定します
+// view_point = { x : int, y : int }
+// return bool
+function is_available_view_point(view_point) {
+    let targets = [view_point.x - board_offset_x, view_point.y - board_offset_y];
+    return targets.every(target => 0 <= target && target < board_size);
 }
 
 // 石を描画します。
