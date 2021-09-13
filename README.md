@@ -1,118 +1,98 @@
-# 1-3. 画面を作ろう　石を描画しよう
+# 2-1. クリックで石を置こう　クリックイベント
 
-オセロ石は固定的ではないため、描画処理を書くには作戦が要ります。
+前回までで一通り描画処理ができました。
+MVCモデルでいうところのViewですね。
 
-* 石1個を描くのにどんな情報が要るか？
-* 盤上の石全部を表すにはどんなデータにしたいか？
+そして今回からはクリックに反応して動作するアプリっぽいものに入っていきます。
 
-という、データの受け渡しに関する部分を設計していきます。
+## クリックイベント
 
-※途中コメントについて触れていますが、JSDocに準じるのはこの記事ではやりません。
+最初は難しそうに思うかもしれませんが、なかなかシンプルなコードでイベントを受け取ることができます。
+`window.onload`の処理の中に↓を書いてみましょう。これだけで盤をクリックしたときにアラートダイアログができるようになります。
 
-## 石1個の描画情報
 
-SVGのcircleを使って石を表現するには、中心点の座標、直径、色があればできそうです。
-では受け取りはその3つにしたらよいか？いいえ、もっと整理しないといけません。
-
-### 中心点の座標
-
-SVGにおいての座標は、あくまで描画する地点を表します。そしてこれはcircleタグを実際書く段階で最終的に決まればいいものなので、この座標を外から受け取る時点ではまだ無くてよいです。
-
-そうすると必要なのは「どこのセルか？」がわかる物であればよいですね。今回はセルを表すのに{x:0, y:0}といった連想配列で表現してみましょう。
-
-ここで盤面的な座標を受け取り、描画領域の座標を求めるお仕事が発生したので、専用メソッドを作ります。
-
-コメントに引数のデータがどんな物か例を書いておくのもミソですね。特に0～7って書いてるのも勘違いを防ぎます。1～8で書いてる部分があったとして混同しにくくなります。
-
-戻り値がある物なのでその構造もコメントに書くとよいでしょう。
 ```
-// マス座標を石描画座標に変換します。
-// cell_point = { x : 0..7, y : 0..7 }
-// return { x : int, y : int }
-function parse_stone_view_point(cell_point) {
-    let cell_offset = cell_size / 2;
-    return {
-        x : board_offset_x + cell_point.x * cell_size + cell_offset,
-        y : board_offset_x + cell_point.y * cell_size + cell_offset,
+    document.querySelector('svg#board').onclick = function() {
+        alert('hoge');
     }
-}
 ```
 
-### 直径
+### コールバックメソッド
 
-これは固定でいいはずのものです。但しSTEP1-2でやったように固定的な数字は定数にしていくのと、適切な名前の定義にしておくべきですね。
+上記のように、要素の`onclick`プロパティに対して`function() {～～～}`と、メソッドを丸々代入するような書き方をコールバックメソッドとかコールバック関数と言います。
 
-```
-const stone_radius = (cell_size / 2) * (8 / 10); // マスの80%
-```
-### 色
+これは、この要素（ここではSVGタグ）をクリックしたというイベントをキャッチしたときに、実行したいメソッドを登録してるということになります。
 
-オセロの石なので黒か白の情報があればいいです。が、ここで注意です。またまたSTEP1-2で出てきた話です。
+そのため、`onload`の中に書いてあってもページが表示されたタイミングではメソッドの中身は実行されず、あくまでイベントをキャッチしたときにしか実行されません。
 
-色番号としての黒#000と白#FFFは、オセロとしての黒と白とでは、結果的に同じものですが意味的には別物です。
+ここまで読んでお気づきかと思いますが、`window.onload`に代入してるのもコールバックメソッドで、このページが表示された時のイベントをキャッチしてメソッドが実行されます。
 
-この程度ならわざわざ表現しなくてもよいのですが、練習なので連想配列にてあるべき構造で表現してみましょう。
-石としての黒と白があり、それぞれの構成情報として色番号を持っている　という構造ができました。
-```
-const STONE = {
-  BLACK : { color : '#000' },
-  WHITE : { color : '#FFF' }
-};
-```
+メソッドを登録すればいいだけなので、↓のような書き方もできます。ここで間違えて`= fuga();`としてしまうと、メソッドを登録ではなく、メソッドの戻り値を登録になってしまうため、fugaは即時実行されてしまいます。
 
-### 描画
-
-以上を踏まえて描画メソッドはpointの連想配列とstoneの連想配列を、↓のコメントのような範囲で受け取り、
-中で座標変換を呼び出しつつ、タグを作る感じになりました。
-
-onloadでこのようにメソッドを呼び出してみると、見事石が描画されました。
 ```
 window.onload = function() {
     draw_board();
-    draw_stone({x:2, y:5}, STONE.BLACK);
-    draw_stone({x:4, y:2}, STONE.WHITE);
-    draw_stone({x:0, y:1}, STONE.BLACK);
-    draw_stone({x:3, y:7}, STONE.WHITE);
+    board_element().onclick = fuga;
 };
 
-// 石を描画します。
-// cell_point = { x : 0..7, y : 0..7 }
-// stone = STONE.BLACK or STONE.WHITE
-function draw_stone(cell_point, stone) {
-    let view_point = parse_stone_view_point(cell_point);
-    let circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    circle.setAttribute('cx', view_point.x);
-    circle.setAttribute('cy', view_point.y);
-    circle.setAttribute('r', stone_radius);
-    circle.setAttribute('fill', stone.color);
-    board_element().appendChild(circle);
+function fuga() {
+    alert('hoge');
 }
 ```
-- - -
-![step1-3](./images/step1-3.png)
-- - -
-## 石全部のデータ構造
+### クリック座標取得
 
-今度は石全部を表す方法を考えます。が、こちらは結局配列があれば良いだけですから、
-単純にマス座標と石の連想配列を石1個の配置情報として、それらの配列を用意するだけで良さそうです。
+上記は`onclick`でイベントをキャッチしてみましたが、クリックした座標が欲しい場合は`addEventListener`を使ったりします。書き方は少し変わりますがコールバックメソッドであることは変わりません。
 
+コールバックメソッドの引数に指定した e の中にいろいろ情報が入ってます。今回取りたいのは要素の中での座標です。
+
+↓は盤をクリックしたら盤の中での座標をログに表示するようにしました。ログはブラウザの「その他ツール」→「デベロッパーツール」→上部タブの「Console」を表示してみましょう
+
+※Chromeの場合の名前で、各種ブラウザで同じ機能があります。これらの開発用ツールは非常に便利ですので積極的に使ってみてください。
 ```
-    let put_stones = [
-        { cell_point : { x : 2, y : 5 }, stone : STONE.BLACK },
-        { cell_point : { x : 4, y : 2 }, stone : STONE.WHITE },
-        { cell_point : { x : 0, y : 1 }, stone : STONE.BLACK },
-        { cell_point : { x : 3, y : 7 }, stone : STONE.WHITE },
-    ];
-    for (let put_stone of put_stones) {
-        draw_stone(put_stone.cell_point, put_stone.stone);
+    board_element().addEventListener('click', function(e){
+        console.log('x : ' + e.offsetX + '  y : ' + e.offsetY);
+    });
+```
+- - -
+![step2-1](./images/step2-1.png)
+
+- - -
+## 画面座標をマス座標に変換する
+
+STEP1-3で描画のために変換したやつの逆バージョンが要りますね。
+しかし今回も注意する点があります。割り算が入るときは小数点の扱いを考える必要があります。
+
+今回はマス座標にするので整数しか受け付けられません。左上のマスで考えると、0～39を0、40～79を1とすれば良さそうですので、小数点切り捨ての関数を使います。
+
+まだ使ってませんが盤のoffsetも忘れずに。
+```
+// 画面座標からマス座標に変換します。
+// view_point = { x : int, y : int }
+// return { x : 0..7, y : 0..7 }
+function parse_cell_point(view_point) {
+    return {
+        x : Math.floor((view_point.x - board_offset_x) / cell_size),
+        y : Math.floor((view_point.y - board_offset_y) / cell_size)
     }
+}
 ```
 
+書いたコードをテストしてみましょう。思った通りのマスで思った通りの座標が出力されているか確認してみてください。
+```
+window.onload = function() {
+    draw_board();
+    board_element().addEventListener('click', function(e){
+        console.log('x : ' + e.offsetX + '  y : ' + e.offsetY);
+        let cell_point = parse_cell_point({ x : e.offsetX, y : e.offsetY });
+        console.log('cell_x : ' + cell_point.x + '  cell_y : ' + cell_point.y);
+    });
+};
+```
 - - -
 前回とのコード差分
 
-https://github.com/hajipong/othello_programme_study/compare/step1_2...step1_3
+https://github.com/hajipong/othello_programme_study/compare/step1_3...step2_1
 - - -
 
-[＜前](https://github.com/hajipong/othello_programme_study/tree/step1_2)　
-[次＞](https://github.com/hajipong/othello_programme_study/tree/step2_1)
+[＜前](https://github.com/hajipong/othello_programme_study/tree/step1_3)　
+[次＞](https://github.com/hajipong/othello_programme_study/tree/step2_2)
