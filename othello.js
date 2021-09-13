@@ -16,15 +16,11 @@ const STONE = {
 
 window.onload = function() {
     draw_board();
-    let put_stones = [
-        { cell_point : { x : 2, y : 5 }, stone : STONE.BLACK },
-        { cell_point : { x : 4, y : 2 }, stone : STONE.WHITE },
-        { cell_point : { x : 0, y : 1 }, stone : STONE.BLACK },
-        { cell_point : { x : 3, y : 7 }, stone : STONE.WHITE },
-    ];
-    for (let put_stone of put_stones) {
-        draw_stone(put_stone.cell_point, put_stone.stone);
-    }
+    board_element().addEventListener('click', function(e){
+        console.log('x : ' + e.offsetX + '  y : ' + e.offsetY);
+        let cell_point = parse_cell_point({ x : e.offsetX, y : e.offsetY });
+        console.log('cell_x : ' + cell_point.x + '  cell_y : ' + cell_point.y);
+    });
 };
 
 // マス座標を石描画座標に変換します。
@@ -34,7 +30,17 @@ function parse_stone_view_point(cell_point) {
     let cell_offset = cell_size / 2;
     return {
         x : board_offset_x + cell_point.x * cell_size + cell_offset,
-        y : board_offset_x + cell_point.y * cell_size + cell_offset,
+        y : board_offset_x + cell_point.y * cell_size + cell_offset
+    }
+}
+
+// 画面座標からマス座標に変換します。
+// view_point = { x : int, y : int }
+// return { x : 0..7, y : 0..7 }
+function parse_cell_point(view_point) {
+    return {
+        x : Math.floor((view_point.x - board_offset_x) / cell_size),
+        y : Math.floor((view_point.y - board_offset_y) / cell_size)
     }
 }
 
