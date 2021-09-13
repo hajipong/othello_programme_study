@@ -81,7 +81,7 @@ function draw_board_line(x1, y1, x2, y2) {
 お仕事の名前が適切に付けられていれば、その範囲外のお仕事を書きだした時に「あぁこれは別メソッドがいいんだな」ということに気が付けるようになります。
 
 - - -
-コード
+前回とのコード差分
 
 https://github.com/hajipong/othello_programme_study/compare/step1...step1_2
 - - -
