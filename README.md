@@ -5,7 +5,7 @@
 * 石1個を描くのにどんな情報が要るか？
 * 盤上の石全部を表すにはどんなデータにしたいか？
 
-という、データの受け渡しに関する部分を設計していきます。このSTEPでは石1個に絞って考えましょう。
+という、データの受け渡しに関する部分を設計していきます。
 
 ※途中コメントについて触れていますが、JSDocに準じるのはこの記事ではやりません。
 
@@ -91,10 +91,28 @@ function draw_stone(cell_point, stone) {
 - - -
 ![step1-3](./images/step1-3.png)
 - - -
+## 石1個の描画情報
+
+今度は石全部を表す方法を考えます。が、こちらは結局配列があれば良いだけですから、
+単純にマス座標と石の連想配列を石1個の配置情報として、それらの配列を用意するだけで良さそうです。
+
+```
+    let put_stones = [
+        { cell_point : { x : 2, y : 5 }, stone : STONE.BLACK },
+        { cell_point : { x : 4, y : 2 }, stone : STONE.WHITE },
+        { cell_point : { x : 0, y : 1 }, stone : STONE.BLACK },
+        { cell_point : { x : 3, y : 7 }, stone : STONE.WHITE },
+    ];
+    for (let put_stone of put_stones) {
+        draw_stone(put_stone.cell_point, put_stone.stone);
+    }
+```
+
+- - -
 前回とのコード差分
 
 https://github.com/hajipong/othello_programme_study/compare/step1_2...step1_3
 - - -
 
 [＜前](https://github.com/hajipong/othello_programme_study/tree/step1_2)　
-[次＞](https://github.com/hajipong/othello_programme_study/tree/step1_4)
+[次＞](https://github.com/hajipong/othello_programme_study/tree/step2_1)

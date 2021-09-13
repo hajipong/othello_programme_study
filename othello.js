@@ -10,16 +10,21 @@ const board_bottom_y = board_offset_y + board_size;
 const stone_radius = (cell_size / 2) * (8 / 10); // マスの80%
 
 const STONE = {
-  BLACK : { color : '#000' },
-  WHITE : { color : '#FFF' }
+    BLACK : { color : '#000' },
+    WHITE : { color : '#FFF' }
 };
 
 window.onload = function() {
     draw_board();
-    draw_stone({x:2, y:5}, STONE.BLACK);
-    draw_stone({x:4, y:2}, STONE.WHITE);
-    draw_stone({x:0, y:1}, STONE.BLACK);
-    draw_stone({x:3, y:7}, STONE.WHITE);
+    let put_stones = [
+        { cell_point : { x : 2, y : 5 }, stone : STONE.BLACK },
+        { cell_point : { x : 4, y : 2 }, stone : STONE.WHITE },
+        { cell_point : { x : 0, y : 1 }, stone : STONE.BLACK },
+        { cell_point : { x : 3, y : 7 }, stone : STONE.WHITE },
+    ];
+    for (let put_stone of put_stones) {
+        draw_stone(put_stone.cell_point, put_stone.stone);
+    }
 };
 
 // マス座標を石描画座標に変換します。
