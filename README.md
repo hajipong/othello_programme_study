@@ -92,6 +92,7 @@ function draw_stone(cell_point, stone) {
 ![step1-3](./images/step1-3.png)
 - - -
 前回とのコード差分
+
 https://github.com/hajipong/othello_programme_study/compare/step1_2...step1_3
 - - -
 
