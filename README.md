@@ -1,90 +1,99 @@
-# 1-2. 画面を作ろう　SVGの出力をJS側にする
+# 1-3. 画面を作ろう　石を描画しよう
 
-固定部分はHTML側に書いても良いのですが、
-盤の大きさなどの基準を管理したい場合、JS側で書き出すようにしておいた方が便利です。
+オセロ石は固定的ではないため、描画処理を書くには作戦が要ります。
 
-JavaScriptの基本的な構文などはここでは扱わないので、ここのコードがわからない場合は入門的なものを先に調べておくことをお勧めします。
+* 石1個を描くのにどんな情報が要るか？
+* 盤上の石全部を表すにはどんなデータにしたいか？
 
-コードのポイントをかいつまんで話します。
+という、データの受け渡しに関する部分を設計していきます。このSTEPでは石1個に絞って考えましょう。
 
-## JavaScriptでSVG内の要素を作成する
+※途中コメントについて触れていますが、JSDocに準じるのはこの記事ではやりません。
 
-JSにて要素を作成する際は`createElement`でタグ名を指定して作成しますが、SVG関連のタグにおいてはこの方法で作成できません。
+## 石1個の描画情報
 
-代わりに少し長くなりますが、`document.createElementNS('http://www.w3.org/2000/svg', 'rect');`という記述で要素を作成できます。
-作成後の操作は同じで、`setAttribute`などをして`appendChild(rect)`で親要素に追加します。
+SVGのcircleを使って石を表現するには、中心点の座標、直径、色があればできそうです。
+では受け取りはその3つにしたらよいか？いいえ、もっと整理しないといけません。
 
-## 盤上線をループで座標計算
+### 中心点の座標
 
-盤上の線は8マス分の間7本の線をひきます。↓はループで回したiに合わせてy座標を動かして横線を描くところです。
+SVGにおいての座標は、あくまで描画する地点を表します。そしてこれはcircleタグを実際書く段階で最終的に決まればいいものなので、この座標を外から受け取る時点ではまだ無くてよいです。
+
+そうすると必要なのは「どこのセルか？」がわかる物であればよいですね。今回はセルを表すのに{x:0, y:0}といった連想配列で表現してみましょう。
+
+ここで盤面的な座標を受け取り、描画領域の座標を求めるお仕事が発生したので、専用メソッドを作ります。
+
+コメントに引数のデータがどんな物か例を書いておくのもミソですね。特に0～7って書いてるのも勘違いを防ぎます。1～8で書いてる部分があったとして混同しにくくなります。
+
+戻り値がある物なのでその構造もコメントに書くとよいでしょう。
 ```
-    for (let i = 1; i < 8; i++) {
-        let y = board_top_y + i * cell_size;
-        draw_board_line(board_left_x, y, board_right_x, y);
+// マス座標を石描画座標に変換します。
+// cell_point = { x : 0..7, y : 0..7 }
+// return { x : int, y : int }
+function parse_stone_view_point(cell_point) {
+    let cell_offset = cell_size / 2;
+    return {
+        x : board_offset_x + cell_point.x * cell_size + cell_offset,
+        y : board_offset_x + cell_point.y * cell_size + cell_offset,
     }
+}
 ```
 
-## 単純で固定的な部分でもしっかりリファクタする習慣をつける
+### 直径
 
-プログラムの練習という意味を兼ねて、とりあえず動くコードではなく開発現場で通用するような読みやすくバグの発生しにくいコードを書くように心がけていきます。
-
-### ポイント１：決まった数字は定数にしよう
-コードの各部分に決まっている数字を埋め込むのは、後で自分に跳ね返ってきます。
-例えばマスの大きさをちょっと変えたい時に死にます。
-
-座標系を扱う時は最初は使わなくてもオフセットの数字を用意しておくのもコツです。
-```
-const cell_size = 40;
-const board_offset_x = 0;
-const board_offset_y = 0;
-```
-
-### ポイント２：同じ値でも意味が違う定数は分けよう
-盤の左端のX座標は、つまりはオフセットの値だな！と、コード内に`board_offset_x`とそのまま書くのではなく、
-「盤の左端のX座標」という意味のある名前で定義付けましょう。「結果的に同じものでも、意味的には別物」という視点を持っておきましょう。
-
-今後コードが複雑になっていく上で、こういう名前付けがバグを防いでくれます。
-```
-const board_size = cell_size * 8;
-const board_left_x = board_offset_x;
-const board_right_x = board_offset_x + board_size;
-const board_top_y = board_offset_y;
-const board_bottom_y = board_offset_y + board_size;
-```
-
-### ポイント３：メソッドの分け方は仕事の内容
-大枠の仕事が決まってるからと、全ての処理を1メソッドで書いてしまう人も多いと思います。
-
-しかしこういうところでコードの全体の複雑さが上がってしまいます。複雑さが上がると、他人はもちろん自分でも自分で書いたコードがわからなくなってしまいます。
-
-ここでは「盤を描画する」のメソッドの中で背景と線の実際のタグを作成する部分を分離しました。
-`draw_board()`でやる仕事のうち「背景を実際にタグで描画」「線を実際にタグで描画」と明確に仕事内容を切り出せるものを分離して、本体は座標を決めてそれぞれを呼び出すに止まります。
+これは固定でいいはずのものです。但しSTEP1-2でやったように固定的な数字は定数にしていくのと、適切な名前の定義にしておくべきですね。
 
 ```
-// オセロ盤の土台部分を描画します。
-function draw_board() {
-...
-// 背景部分の描画
-function draw_board_background() {
-...
-// 盤上の線の描画
-function draw_board_line(x1, y1, x2, y2) {
+const stone_radius = (cell_size / 2) * (8 / 10); // マスの80%
+```
+### 色
+
+オセロの石なので黒か白の情報があればいいです。が、ここで注意です。またまたSTEP1-2で出てきた話です。
+
+色番号としての黒#000と白#FFFは、オセロとしての黒と白とでは、結果的に同じものですが意味的には別物です。
+
+この程度ならわざわざ表現しなくてもよいのですが、練習なので連想配列にてあるべき構造で表現してみましょう。
+石としての黒と白があり、それぞれの構成情報として色番号を持っている　という構造ができました。
+```
+const STONE = {
+  BLACK : { color : '#000' },
+  WHITE : { color : '#FFF' }
+};
 ```
 
-メソッドを分ける基準は、再利用するからという理由もありますが、どちらかというと部品と組み立てとか、タスクと業務のように、分けることによって部品管理できるようにする意図が強いです。
+### 描画
 
-### ポイント４：一番大事なのは名前付け
-「こういう時は、こうしたほうが良い」というのTIPS的な技術も大事ですが、大前提として「変数やメソッドが適切な名前が付けられていること」が根幹になります。
+以上を踏まえて描画メソッドはpointの連想配列とstoneの連想配列を、↓のコメントのような範囲で受け取り、
+中で座標変換を呼び出しつつ、タグを作る感じになりました。
 
-ポイント2でも同じような事を言いましたが、「このメソッドでやってるお仕事と名前が一致しているか」「この変数の意味が名前で表現できているか」を意識しつつ、省略もなるべくしないように心がけると良いでしょう。
+onloadでこのようにメソッドを呼び出してみると、見事石が描画されました。
+```
+window.onload = function() {
+    draw_board();
+    draw_stone({x:2, y:5}, STONE.BLACK);
+    draw_stone({x:4, y:2}, STONE.WHITE);
+    draw_stone({x:0, y:1}, STONE.BLACK);
+    draw_stone({x:3, y:7}, STONE.WHITE);
+};
 
-お仕事の名前が適切に付けられていれば、その範囲外のお仕事を書きだした時に「あぁこれは別メソッドがいいんだな」ということに気が付けるようになります。
-
+// 石を描画します。
+// cell_point = { x : 0..7, y : 0..7 }
+// stone = STONE.BLACK or STONE.WHITE
+function draw_stone(cell_point, stone) {
+    let view_point = parse_stone_view_point(cell_point);
+    let circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', view_point.x);
+    circle.setAttribute('cy', view_point.y);
+    circle.setAttribute('r', stone_radius);
+    circle.setAttribute('fill', stone.color);
+    board_element().appendChild(circle);
+}
+```
 - - -
-コード
-
-https://github.com/hajipong/othello_programme_study/compare/step1...step1_2
+![step1-3](./images/step1-3.png)
+- - -
+前回とのコード差分
+https://github.com/hajipong/othello_programme_study/compare/step1_2...step1_3
 - - -
 
-[＜前](https://github.com/hajipong/othello_programme_study/tree/step1)　
-[次＞](https://github.com/hajipong/othello_programme_study/tree/step1_3)
+[＜前](https://github.com/hajipong/othello_programme_study/tree/step1_2)　
+[次＞](https://github.com/hajipong/othello_programme_study/tree/step1_4)
