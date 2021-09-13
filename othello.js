@@ -7,10 +7,44 @@ const board_left_x = board_offset_x;
 const board_right_x = board_offset_x + board_size;
 const board_top_y = board_offset_y;
 const board_bottom_y = board_offset_y + board_size;
+const stone_radius = (cell_size / 2) * (8 / 10); // マスの80%
+
+const STONE = {
+  BLACK : { color : '#000' },
+  WHITE : { color : '#FFF' }
+};
 
 window.onload = function() {
     draw_board();
+    draw_stone({x:2, y:5}, STONE.BLACK);
+    draw_stone({x:4, y:2}, STONE.WHITE);
+    draw_stone({x:0, y:1}, STONE.BLACK);
+    draw_stone({x:3, y:7}, STONE.WHITE);
 };
+
+// マス座標を石描画座標に変換します。
+// cell_point = { x : 0..7, y : 0..7 }
+// return { x : int, y : int }
+function parse_stone_view_point(cell_point) {
+    let cell_offset = cell_size / 2;
+    return {
+        x : board_offset_x + cell_point.x * cell_size + cell_offset,
+        y : board_offset_x + cell_point.y * cell_size + cell_offset,
+    }
+}
+
+// 石を描画します。
+// cell_point = { x : 0..7, y : 0..7 }
+// stone = STONE.BLACK or STONE.WHITE
+function draw_stone(cell_point, stone) {
+    let view_point = parse_stone_view_point(cell_point);
+    let circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', view_point.x);
+    circle.setAttribute('cy', view_point.y);
+    circle.setAttribute('r', stone_radius);
+    circle.setAttribute('fill', stone.color);
+    board_element().appendChild(circle);
+}
 
 // オセロ盤の土台部分を描画します。
 function draw_board() {
