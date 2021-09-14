@@ -3,7 +3,7 @@ import { board_view, STONE } from "./board_view.js";
 let turn = STONE.BLACK;
 
 window.onload = function() {
-    board_view.draw_board();
+    board_view.init();
     board_view.set_click_listener(on_board_click);
 };
 

@@ -20,8 +20,12 @@ export const STONE = {
 class BoardView {
     constructor() {
         this.board_element = document.querySelector('svg#board');
+    }
+
+    init() {
         this.board_element.setAttribute('width', board_offset_x + board_size);
         this.board_element.setAttribute('height', board_offset_y + board_size);
+        this.draw_board();
     }
 
     // クリックイベントリスナーを登録します。
