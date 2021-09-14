@@ -86,4 +86,4 @@ https://github.com/hajipong/othello_programme_study/compare/step2_2...step2_3
 - - -
 
 [＜前](https://github.com/hajipong/othello_programme_study/tree/step2_2)　
-[次＞](https://github.com/hajipong/othello_programme_study/tree/step3_1)
+[次＞](https://github.com/hajipong/othello_programme_study/tree/step2_4)
